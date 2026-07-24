@@ -8,13 +8,17 @@
 <title>Japonessa · Allergen Guide</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700;900&family=Inter:wght@400;500;600;700&family=Audiowide&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Audiowide&display=swap" rel="stylesheet">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <style>
   :root{
     --bg:#F6F3F3;
     --ink:#161414;
     --red:#C8102E;
     --red-dark:#9E0B23;
+    --blue:#0066CC;
     --card:#FFFFFF;
     --line:#E4DEDE;
     --muted:#6E6666;
@@ -43,7 +47,7 @@
   body.dark .mode button.active{color:#131010}
   body.dark .mode button.active.avoid{color:#fff}
   body.dark .mode button.active.safe{color:#fff}
-  body.dark .card-head:active{background:#242020}
+  body.dark .card-head:active{background:transparent}
   body.dark table.alg td{border-bottom-color:#2C2727}
   body.dark table.alg tr.match td{background:#331119}
 
@@ -86,29 +90,31 @@
   .count{font-size:13px;color:var(--muted);margin:14px 2px 8px}
   .count b{color:var(--ink)}
 
-  .cat{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin:22px 2px 10px;display:flex;align-items:center;gap:10px; text-transform: uppercase;}
+  .cat{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;letter-spacing:.1em;margin:22px 2px 10px;display:flex;align-items:center;gap:10px;text-transform:uppercase;animation:fadeSlideIn .35s ease-out both}
   .cat::after{content:"";flex:1;height:1px;background:var(--line)}
 
   .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04)}
   .card-head{display:flex;align-items:center;gap:10px;padding:14px 16px;cursor:pointer;user-select:none}
-  .card-head:active{background:#FAF7F7}
+  .card-head:active{background:transparent}
   .card-title{flex:1}
-  .card-title h3{font-family:'Playfair Display',serif;font-size:17.5px;font-weight:700}
+  .card-title h3{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:600;letter-spacing:.02em}
   .card-title .cat-tag{display:none;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:2px}
-  .card.open .card-title .cat-tag{display:block}
+  .card.open > .card-head .card-title .cat-tag{display:block}
   .badge{flex:none;font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px}
   .badge.hit{background:var(--red);color:#fff}
   .badge.safe{background:var(--green-bg);color:var(--green-ink)}
   .badge.caution{background:var(--amber-bg);color:var(--amber-ink)}
   .chev{flex:none;transition:transform .2s;color:var(--muted)}
-  .card.open .chev{transform:rotate(180deg)}
+  .card.open > .card-head .chev{transform:rotate(180deg)}
 
   .card-body{display:none;padding:0 16px 16px;border-top:1px dashed var(--line)}
-  .card.open .card-body{display:block}
+  .card.open > .card-body{display:block}
   .sec{margin-top:14px}
   .sec h4{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--red);margin-bottom:7px}
   .ing{display:flex;flex-wrap:wrap;gap:6px}
   .ing span{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:4px 10px;font-size:12.5px}
+  .ing button{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:4px 10px;font:inherit;font-size:12.5px;color:var(--ink);cursor:pointer;text-align:left}
+  .ing button:active{background:var(--line)}
 
   table.alg{width:100%;border-collapse:collapse;font-size:13px}
   table.alg td{padding:6px 8px;border-bottom:1px solid #F0EBEB;vertical-align:top}
@@ -121,15 +127,80 @@
   .lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:100;align-items:center;justify-content:center;cursor:zoom-out;padding:18px}
   .lightbox.on{display:flex}
   .lightbox img{max-width:min(94vw,760px);max-height:86vh;border-radius:14px;box-shadow:0 8px 40px rgba(0,0,0,.6)}
+  .pair-toggle{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;padding:2px 0}
+  .pair-toggle h4{margin:0;color:var(--blue)}
+  .pair-toggle .pair-chev{transition:transform .25s ease;width:14px;height:14px}
+  .pair-toggle.open .pair-chev{transform:rotate(180deg)}
+  .pair-wrap{display:none}
+  .pair-toggle.open + .pair-wrap{display:block}
   .pair{background:var(--bg);border-radius:10px;padding:10px 12px;font-size:13px;margin-top:6px}
   .pair b{font-weight:600}
   .note{background:var(--amber-bg);color:var(--amber-ink);border-radius:10px;padding:10px 12px;font-size:12.5px;margin-top:10px}
 
   .empty{text-align:center;padding:50px 20px;color:var(--muted)}
-  .empty .big{font-family:'Playfair Display',serif;font-size:22px;color:var(--ink);margin-bottom:8px}
+  .empty .big{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;letter-spacing:.04em;color:var(--ink);margin-bottom:8px}
 
   footer{max-width:880px;margin:0 auto;padding:20px 16px 40px;font-size:11.5px;color:var(--muted);text-align:center;border-top:1px solid var(--line)}
   footer .warn{color:var(--red);font-weight:600}
+  .glossary{max-width:none;margin:22px 0 0;padding:0}
+  .glossary-toggle{margin-bottom:0}
+  .glossary-toggle > .card-head .card-title h3{text-transform:uppercase}
+  .glossary-content{display:none}
+  .glossary.open .glossary-content{display:block}
+  .glossary.open .glossary-toggle .chev{transform:rotate(180deg)}
+  .glossary-grid{margin-top:16px}
+  .glossary-copy{font-size:13px;color:var(--ink)}
+  .glossary .ing{margin-top:8px}
+
+  @keyframes fadeSlideIn{
+    from{opacity:0;transform:translateY(8px)}
+    to{opacity:1;transform:translateY(0)}
+  }
+  @keyframes slideDown{
+    from{opacity:0;transform:translateY(-6px)}
+    to{opacity:1;transform:translateY(0)}
+  }
+  @keyframes chipPop{
+    0%{transform:scale(1)}
+    50%{transform:scale(.93)}
+    100%{transform:scale(1)}
+  }
+
+  .card{animation:fadeSlideIn .3s ease-out both;transition:transform .15s ease,box-shadow .15s ease}
+  .cards-grid .card:nth-child(2){animation-delay:.04s}
+  .cards-grid .card:nth-child(3){animation-delay:.08s}
+  .cards-grid .card:nth-child(4){animation-delay:.1s}
+  .cards-grid .card:nth-child(5){animation-delay:.12s}
+  .cards-grid .card:nth-child(6){animation-delay:.14s}
+  .card:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(0,0,0,.07)}
+  body.dark .card:hover{box-shadow:0 4px 14px rgba(0,0,0,.3)}
+  .card:active{transform:translateY(0)}
+
+  .card.open > .card-body{animation:slideDown .25s ease-out}
+  .chev{transition:transform .25s ease}
+
+  .chips button{transition:background .15s ease,border-color .15s ease,color .15s ease,transform .1s ease}
+  .chips button:hover{border-color:var(--ink)}
+  .chips button:active{transform:scale(.93)}
+  .chips button.on{animation:chipPop .2s ease-out}
+
+  .mode button{transition:all .15s ease}
+  .mode button:active{transform:scale(.95)}
+  .themeBtn,.langBtn{transition:background .15s ease,transform .1s ease}
+  .themeBtn:active,.langBtn:active{transform:scale(.9)}
+
+  .searchbox{transition:border-color .2s ease,box-shadow .2s ease}
+  .searchbox:focus-within{border-color:var(--red);box-shadow:0 0 0 3px rgba(200,16,46,.12)}
+  body.dark .searchbox:focus-within{box-shadow:0 0 0 3px rgba(200,16,46,.25)}
+
+  .thumb{transition:transform .2s ease,box-shadow .2s ease}
+  .thumb:hover{transform:scale(1.05);box-shadow:0 4px 16px rgba(0,0,0,.15)}
+
+  .badge{transition:transform .15s ease}
+  .badge:hover{transform:scale(1.05)}
+
+  .lightbox{transition:opacity .2s ease}
+  .lightbox img{transition:transform .2s ease}
 
   @media(min-width:700px){
     .cards-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -166,6 +237,15 @@
   </div>
   <div class="count" id="count"></div>
   <div id="results"></div>
+  <section class="glossary" id="glossary" aria-labelledby="glossaryTitle">
+    <div class="card glossary-toggle" id="glossaryToggle">
+      <div class="card-head" role="button" tabindex="0" aria-expanded="false" aria-controls="glossaryCards">
+        <div class="card-title"><h3 id="glossaryTitle"></h3></div>
+        <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="card-body glossary-content" id="glossaryCards"></div>
+    </div>
+  </section>
 </div>
 
 <footer>
@@ -334,10 +414,28 @@ const DATA = {
         "pair": {"w": "Dry rosé or Riesling — slight sweetness and fruit tones balance the spice and fish tones.", "r": "Pinot Noir or lighter red blend, slightly chilled — bright, fruity flavors pair beautifully with the creamy tuna and heat.", "s": "Nigori sake — creamy texture and a touch of sweetness balance flavors and cool the heat of the peppers."},
         "thumb": "https://d1w7312wesee68.cloudfront.net/1gZMq4LnCKuJUTLePipIV0zdOUE5BsbItg69dKJh-sw/resize:fit:360:360/plain/s3://toasttab/menu_service/restaurants/3d4c69ad-6484-48ce-8d6f-8d273c744f0d/MenuItem/cd2c6a50-fd11-4b20-9932-6a114b762d0d.jpg",
         "img": "https://d1w7312wesee68.cloudfront.net/OxOrS67iiyPx0DM3rDWaF2gegfJdpO9XKrf7akcvoFw/resize:fit:720:720/plain/s3://toasttab/menu_service/restaurants/3d4c69ad-6484-48ce-8d6f-8d273c744f0d/MenuItem/cd2c6a50-fd11-4b20-9932-6a114b762d0d.jpg"
+      },
+      {
+        "name": "Ladybug Samba",
+        "cat": "SIGNATURE ROLLS",
+        "ings": ["Salmon karaage", "Basil", "Cilantro", "Tomato", "Avocado", "Habanero masago", "Jalapeno citrus sauce (contains truffle)", "Sushi rice"],
+        "alg": [{"a": "Gluten", "s": "Salmon karaage, jalapeno citrus sauce, habanero masago"}, {"a": "Soy", "s": "Tempura batter* (contains soy lecithin), jalapeno citrus sauce"}, {"a": "Fish", "s": "Salmon karaage, red masago"}, {"a": "Nightshade", "s": "Tomato, jalapeno citrus sauce, red masago"}, {"a": "Rice", "s": "Sushi rice"}, {"a": "Corn", "s": "Salmon karaage"}, {"a": "Garlic", "s": "Jalapeno citrus sauce"}, {"a": "Citrus", "s": "Jalapeno citrus sauce"}, {"a": "Rapeseed", "s": "Jalapeno citrus sauce"}, {"a": "Ginger", "s": "Jalapeno citrus sauce, pickled ginger"}, {"a": "Avocado", "s": "Avocado"}, {"a": "Cilantro", "s": "Cilantro"}],
+        "pair": {"w": "Crisp, high-acid white or rosé, or sparkling — effervescence cuts through fried batter and fatty fish; citrus notes complement savory sauces and vinegared rice.", "r": "Pinot Noir or a juicy low-tannin red blend, slightly chilled — cuts through oily fried texture and complements rich fish and rice.", "s": "Junmai Ginjo or Tokubetsu Junmai — refreshing acidity balances oily batter and rich salmon; cleanses the palate without overwhelming raw herbs."},
+        "thumb": "https://d1w7312wesee68.cloudfront.net/g3g9dFkn7fZn_lzXYpEqQ1Cj5T8AfLl5Obc1-ZaDFPQ/resize:fit:360:360/plain/s3://toasttab/menu_service/restaurants/3d4c69ad-6484-48ce-8d6f-8d273c744f0d/MenuItem/6960e44e-eda7-4bd6-8dd8-a2b8b974cb7c.jpg",
+        "img": "https://d1w7312wesee68.cloudfront.net/OCDaWYa5dXFuuEYYpo8dFBP5t5424-LFKJygeTrfh3A/resize:fit:720:720/plain/s3://toasttab/menu_service/restaurants/3d4c69ad-6484-48ce-8d6f-8d273c744f0d/MenuItem/6960e44e-eda7-4bd6-8dd8-a2b8b974cb7c.jpg"
+      },
+      {
+        "name": "Tres Diablos",
+        "cat": "SIGNATURE ROLLS",
+        "ings": ["Spicy tuna", "Cucumber", "Cilantro", "Tuna", "Atlantic salmon", "Yellowtail", "Tobiko", "Red masago", "Scallion", "Sushi rice", "Strawberry habanero sauce"],
+        "alg": [{"a": "Egg", "s": "Spicy tuna"}, {"a": "Soy", "s": "Spicy tuna"}, {"a": "Fish", "s": "Spicy tuna, hamachi, salmon, tuna, tobiko, red masago"}, {"a": "Nightshade", "s": "Spicy tuna, strawberry habanero sauce, red masago"}, {"a": "Rice", "s": "Sushi rice"}, {"a": "Corn", "s": "Strawberry habanero sauce"}, {"a": "Garlic", "s": "Spicy tuna"}, {"a": "Cilantro", "s": "Cilantro"}],
+        "pair": {"w": "Off-dry Riesling or Sauvignon Blanc — residual sugar and high acidity balance chili heat and spicy mayo richness while enhancing fish umami.", "r": "Pinot Noir or lighter red blend, slightly chilled — bright fruity flavors pair with creamy tuna and heat without clashing with raw fish.", "s": "Nigori or sparkling sake — nigori's gentle sweetness and creamy texture tame the heat; sparkling sake's carbonation cleanses the palate between spicy bites."},
+        "thumb": "https://d1w7312wesee68.cloudfront.net/vKbU1gVO-ZO49_-0Yi88-g22oCy8VNAavkFYuKor8y0/resize:fit:360:360/plain/s3://toasttab/menu_service/restaurants/3d4c69ad-6484-48ce-8d6f-8d273c744f0d/MenuItem/1ef99597-c07d-4957-bae9-91184637726e.jpg",
+        "img": "https://d1w7312wesee68.cloudfront.net/DxeupK1i4lstTxWsaZVqlE2NcpDj4UN1nG9M9GU7sHE/resize:fit:720:720/plain/s3://toasttab/menu_service/restaurants/3d4c69ad-6484-48ce-8d6f-8d273c744f0d/MenuItem/1ef99597-c07d-4957-bae9-91184637726e.jpg"
       }
     ]
-  }, 
-  
+  },
+
   "es": {
     "ui": {
       "sub": "Guía de Alérgenos · Referencia del Mesero", "placeholder": "Busca alérgeno, ingrediente o platillo…", "modeC": "Contiene el alérgeno", "modeA": "Libre del alérgeno", "hint0": "Toca un alérgeno o escribe para buscar. «Libre del alérgeno» muestra platillos que puedes ofrecer a un cliente con esa alergia.", "hintC": "Mostrando platillos que CONTIENEN lo que buscas.", "hintA": "Mostrando platillos SEGUROS para un cliente con esa alergia. ⚠ = solo riesgo de contacto cruzado.", "of": "de", "dishesW": "platillos", "contain": "contienen", "freeOf": "están libres de", "avoidNote": " (⚠ = solo contacto cruzado — confírmalo con cocina)", "count0": "platillos · toca una tarjeta para ver ingredientes, alérgenos y maridajes", "badgeC": "Contiene", "badgeS": "✓ Seguro", "badgeW": "⚠ Contacto cruzado", "cc": "⚠ contacto cruzado", "noteA1": "⚠ Sin alérgeno directo, pero hay ", "noteA2": "riesgo de contacto cruzado", "noteA3": " (freidora/plancha compartida). Confírmalo con el cliente y la cocina.", "ing": "Ingredientes", "alg": "Alérgenos", "pairT": "Maridajes — Venta Sugerida", "w": "Blanco", "r": "Tinto", "sk": "Sake", "e1": "No hay platillos totalmente seguros", "e1b": "Todos los platillos contienen este alérgeno o tienen riesgo de contacto cruzado. Consulta modificaciones con la cocina.", "e2": "Sin resultados", "e2b": "Prueba con otra palabra o toca un chip de alérgeno arriba.", "ft1": "⚠ Siempre confirma con la cocina / el chef antes de garantizar que un platillo es seguro para una alergia.", "ft2": "Las alertas de contacto cruzado (freidora o plancha compartida) indican posibles trazas — confírmalo con el cliente y la cocina. Fuente: publicaciones semanales de conocimiento de Patrick, feb–jun 2026. El menú cambia; verifica contra el menú vigente.", "title": "Japonessa · Guía de Alérgenos"
@@ -495,7 +593,121 @@ const DATA = {
         "pair": {"w": "Rosado seco o Riesling — su ligero dulzor y tonos frutales equilibran el picante y el pescado.", "r": "Pinot Noir o mezcla tinta ligera, ligeramente frío — brillante y frutal; combina maravillosamente con la cremosidad del atún y el picante.", "s": "Nigori sake — su textura cremosa y toque dulce equilibran los sabores y alivian el picor de los pimientos."},
         "thumb": "https://d1w7312wesee68.cloudfront.net/1gZMq4LnCKuJUTLePipIV0zdOUE5BsbItg69dKJh-sw/resize:fit:360:360/plain/s3://toasttab/menu_service/restaurants/3d4c69ad-6484-48ce-8d6f-8d273c744f0d/MenuItem/cd2c6a50-fd11-4b20-9932-6a114b762d0d.jpg",
         "img": "https://d1w7312wesee68.cloudfront.net/OxOrS67iiyPx0DM3rDWaF2gegfJdpO9XKrf7akcvoFw/resize:fit:720:720/plain/s3://toasttab/menu_service/restaurants/3d4c69ad-6484-48ce-8d6f-8d273c744f0d/MenuItem/cd2c6a50-fd11-4b20-9932-6a114b762d0d.jpg"
+      },
+      {
+        "name": "Ladybug Samba",
+        "cat": "ROLLOS ESPECIALES",
+        "ings": ["Salmón karaage", "Albahaca", "Cilantro", "Tomate", "Aguacate", "Masago habanero", "Salsa de jalapeño cítrica (contiene trufa)", "Arroz de sushi"],
+        "alg": [{"a": "Gluten", "s": "Salmón karaage, salsa de jalapeño cítrica, masago habanero"}, {"a": "Soya", "s": "Masa de tempura* (contiene lecitina de soya), salsa de jalapeño cítrica"}, {"a": "Pescado", "s": "Salmón karaage, masago rojo"}, {"a": "Solanáceas", "s": "Tomate, salsa de jalapeño cítrica, masago rojo"}, {"a": "Arroz", "s": "Arroz de sushi"}, {"a": "Maíz", "s": "Salmón karaage"}, {"a": "Ajo", "s": "Salsa de jalapeño cítrica"}, {"a": "Cítricos", "s": "Salsa de jalapeño cítrica"}, {"a": "Canola", "s": "Salsa de jalapeño cítrica"}, {"a": "Jengibre", "s": "Salsa de jalapeño cítrica, jengibre encurtido"}, {"a": "Aguacate", "s": "Aguacate"}, {"a": "Cilantro", "s": "Cilantro"}],
+        "pair": {"w": "Blanco fresco y ácido, rosado o espumoso — la efervescencia corta la fritura y el pescado graso; las notas cítricas complementan las salsas y el arroz avinagrado.", "r": "Pinot Noir o mezcla tinta jugosa de taninos bajos, ligeramente frío — corta la textura frita y complementa el salmón rico y el arroz.", "s": "Junmai Ginjo o Tokubetsu Junmai — su acidez refrescante equilibra la fritura y el salmón graso; limpia el paladar sin opacar las hierbas frescas."},
+        "thumb": "https://d1w7312wesee68.cloudfront.net/g3g9dFkn7fZn_lzXYpEqQ1Cj5T8AfLl5Obc1-ZaDFPQ/resize:fit:360:360/plain/s3://toasttab/menu_service/restaurants/3d4c69ad-6484-48ce-8d6f-8d273c744f0d/MenuItem/6960e44e-eda7-4bd6-8dd8-a2b8b974cb7c.jpg",
+        "img": "https://d1w7312wesee68.cloudfront.net/OCDaWYa5dXFuuEYYpo8dFBP5t5424-LFKJygeTrfh3A/resize:fit:720:720/plain/s3://toasttab/menu_service/restaurants/3d4c69ad-6484-48ce-8d6f-8d273c744f0d/MenuItem/6960e44e-eda7-4bd6-8dd8-a2b8b974cb7c.jpg"
+      },
+      {
+        "name": "Tres Diablos",
+        "cat": "ROLLOS ESPECIALES",
+        "ings": ["Atún picante", "Pepino", "Cilantro", "Atún", "Salmón del Atlántico", "Yellowtail", "Tobiko", "Masago rojo", "Cebollín", "Arroz de sushi", "Salsa de fresa habanero"],
+        "alg": [{"a": "Huevo", "s": "Atún picante"}, {"a": "Soya", "s": "Atún picante"}, {"a": "Pescado", "s": "Atún picante, hamachi, salmón, atún, tobiko, masago rojo"}, {"a": "Solanáceas", "s": "Atún picante, salsa de fresa habanero, masago rojo"}, {"a": "Arroz", "s": "Arroz de sushi"}, {"a": "Maíz", "s": "Salsa de fresa habanero"}, {"a": "Ajo", "s": "Atún picante"}, {"a": "Cilantro", "s": "Cilantro"}],
+        "pair": {"w": "Riesling semiseco o Sauvignon Blanc — el azúcar residual y la alta acidez equilibran el picante del chile y la riqueza de la mayo picante, realzando el umami del pescado.", "r": "Pinot Noir o mezcla tinta ligera, ligeramente frío — sabores frutales brillantes que combinan con el atún cremoso y el picante sin chocar con el pescado crudo.", "s": "Nigori o sake espumoso — el dulzor suave y la textura cremosa del nigori calman el picor; la carbonatación del espumoso limpia el paladar entre bocados picantes."},
+        "thumb": "https://d1w7312wesee68.cloudfront.net/vKbU1gVO-ZO49_-0Yi88-g22oCy8VNAavkFYuKor8y0/resize:fit:360:360/plain/s3://toasttab/menu_service/restaurants/3d4c69ad-6484-48ce-8d6f-8d273c744f0d/MenuItem/1ef99597-c07d-4957-bae9-91184637726e.jpg",
+        "img": "https://d1w7312wesee68.cloudfront.net/DxeupK1i4lstTxWsaZVqlE2NcpDj4UN1nG9M9GU7sHE/resize:fit:720:720/plain/s3://toasttab/menu_service/restaurants/3d4c69ad-6484-48ce-8d6f-8d273c744f0d/MenuItem/1ef99597-c07d-4957-bae9-91184637726e.jpg"
       }
+    ]
+  }
+};
+
+const GLOSSARY = {
+  en: {
+    title: "GLOSSARY",
+    about: "Quick note",
+    watch: "Watch for",
+    dishes: "Menu dishes",
+    items: [
+      {name:"Avocado", body:"Fruit used fresh in rolls and tartare.", tags:["Mango shiso sauces", "Roll fillings"]},
+      {name:"Cilantro", body:"Fresh herb garnish with a bright citrusy flavor.", tags:["Pico de gallo", "Raw dishes"]},
+      {name:"Citrus", body:"Lemon, lime, orange, yuzu, and citrus-based sauces.", tags:["Yuzu", "Ponzu", "Garnishes"]},
+      {name:"Corn", body:"Can appear in corn starch, tortillas, sauces, and toppings.", tags:["Tempura", "Tortilla chips", "Chorizo"]},
+      {name:"Dairy", body:"Milk-based ingredients such as butter, cheese, and creamy broths.", tags:["Butter", "Brie", "Creamy broth"]},
+      {name:"Egg", body:"Found in mayo, some noodles, onsen egg, and spicy fish mixes.", tags:["Kewpie", "Noodles", "Aioli"]},
+      {name:"Fish", body:"Includes fish proteins, dashi, bonito, roe, and shared stations.", tags:["Dashi", "Bonito", "Roe"]},
+      {name:"Garlic", body:"Common in marinades, ponzu, chili oils, and spicy sauces.", tags:["Ponzu", "Chili oil", "Marinades"]},
+      {name:"Ginger", body:"Used in ginger sauce, pickles, and some spicy seasonings.", tags:["Ginger sauce", "Togarashi"]},
+      {name:"Gluten", body:"Wheat-based items such as noodles, tempura, tortillas, and soy sauces.", tags:["Noodles", "Tempura", "Sauces"]},
+      {name:"Mushroom", body:"Includes mushrooms directly and fryer cross-contact notes.", tags:["Shiitake", "Shared fryer"]},
+      {name:"Nightshade", body:"Peppers, tomatoes, chiles, and spice blends.", tags:["Jalapeno", "Tomato", "Togarashi"]},
+      {name:"Onion", body:"Onions, scallions, and onion-based sauces or garnishes.", tags:["Scallion", "Pico de gallo", "Sauces"]},
+      {name:"Palm", body:"Palm-derived oil appears in some chili oil ingredients.", tags:["Chili oil"]},
+      {name:"Pork", body:"Pork broth or chorizo-based ingredients.", tags:["Ramen", "Chorizo"]},
+      {name:"Rapeseed", body:"Canola/rapeseed oil used in sauces, aioli, fryer, or noodles.", tags:["Canola oil", "Aioli", "Fryer"]},
+      {name:"Rice", body:"Rice, rice vinegar, mirin, sake, and shared fryer notes.", tags:["Sushi rice", "Mirin", "Sake"]},
+      {name:"Sesame", body:"Sesame seeds, sesame oil, or sesame in sauces and seasonings.", tags:["Seeds", "Sauces"]},
+      {name:"Shellfish", body:"Crab, scallop, octopus, squid, shrimp, and fryer cross-contact.", tags:["Crab", "Scallop", "Squid"]},
+      {name:"Shrimp", body:"Shrimp and shrimp-based tempura or raw bar items.", tags:["Tempura shrimp", "Amaebi"]},
+      {name:"Soy", body:"Soy sauce, tofu, miso, soybean oil, and soy-based marinades.", tags:["Soy sauce", "Tofu", "Miso"]},
+      {name:"Stone fruit", body:"Fruits with pits, such as mango or fruit-based sauces.", tags:["Mango", "Fruit sauces"]},
+      {name:"Bamboo shoots", body:"Crunchy shoots used in ramen and pork broth dishes.", tags:["Ramen", "Pork broth"], terms:["Bamboo shoots"]},
+      {name:"Bonito flakes", body:"Dried shaved fish flakes; not vegetarian and contains fish.", tags:["Fish", "Dashi", "Garnish"], terms:["Bonito flakes"]},
+      {name:"Chili oil", body:"Spicy infused oil that can include soy, sesame, garlic, onion, or palm.", tags:["Spice", "Soy", "Sesame"], terms:["Chili oil"]},
+      {name:"Dashi broth", body:"Japanese broth commonly made with fish or bonito.", tags:["Fish", "Bonito", "Soup base"], terms:["Dashi broth", "Dashi stock", "Dashi"]},
+      {name:"Fish cake", body:"Processed seafood cake often made with fish and shellfish.", tags:["Fish", "Shellfish", "Soy"], terms:["Fish cake"]},
+      {name:"Habanero masago", body:"Spicy fish roe topping; contains fish and nightshade heat.", tags:["Fish roe", "Habanero", "Nightshade"], terms:["Habanero masago", "Masago"]},
+      {name:"Kewpie mayo", body:"Japanese mayo; usually contains egg and may include soy-based oil.", tags:["Egg", "Soy oil", "Mayo"], terms:["Kewpie Japanese mayo", "Kewpie"]},
+      {name:"Miso vinaigrette", body:"Miso-based dressing; commonly brings soy and rice notes.", tags:["Soy", "Rice", "Dressing"], terms:["Miso vinaigrette", "Miso"]},
+      {name:"Onsen egg", body:"Soft cooked egg served as an optional topping.", tags:["Egg", "Optional topping"], terms:["Onsen egg"]},
+      {name:"Pico de gallo", body:"Fresh tomato, onion, chile, and citrus salsa.", tags:["Tomato", "Onion", "Citrus"], terms:["Pico de gallo"]},
+      {name:"Ponzu", body:"Citrus soy sauce; usually contains soy, citrus, and sometimes fish.", tags:["Soy", "Citrus", "Garlic"], terms:["Ponzu", "Yuzu ponzu", "Garlic ponzu"]},
+      {name:"Sukiyaki beef", body:"Sweet soy-marinated beef; watch for gluten, soy, onion, and fish notes.", tags:["Soy", "Gluten", "Onion"], terms:["Sukiyaki beef"]},
+      {name:"Teriyaki sauce", body:"Sweet soy-based sauce; often contains gluten, soy, corn, and onion.", tags:["Soy", "Gluten", "Corn"], terms:["Teriyaki sauce"]},
+      {name:"Tobiko", body:"Flying fish roe; contains fish and may carry soy or gluten notes.", tags:["Fish roe", "Fish", "Soy"], terms:["Tobiko"]},
+      {name:"Togarashi", body:"Japanese chile seasoning; watch for nightshade and citrus notes.", tags:["Chile", "Nightshade", "Citrus"], terms:["Itokiri togarashi", "Togarashi"]},
+      {name:"Yuzu", body:"Japanese citrus used in ponzu, aioli, and dressings.", tags:["Citrus", "Sauces", "Aioli"], terms:["Yuzu", "Yuzu aioli", "Yuzu ponzu", "Yuzu citrus"]}
+    ]
+  },
+  es: {
+    title: "GLOSARIO",
+    about: "Nota rápida",
+    watch: "Revisar",
+    dishes: "Platillos",
+    items: [
+      {name:"Aguacate", body:"Fruta fresca usada en rollos y tartares.", tags:["Rollos", "Tartare"]},
+      {name:"Ajo", body:"Común en marinados, ponzu, aceites de chile y salsas picantes.", tags:["Ponzu", "Aceite de chile", "Marinados"]},
+      {name:"Ajonjolí", body:"Semillas o aceite de ajonjolí en salsas y sazonadores.", tags:["Semillas", "Salsas"]},
+      {name:"Arroz", body:"Arroz, vinagre de arroz, mirin, sake y notas de freidora compartida.", tags:["Arroz de sushi", "Mirin", "Sake"]},
+      {name:"Camarón", body:"Camarón y productos con camarón, especialmente tempura y barra fría.", tags:["Camarón tempura", "Amaebi"]},
+      {name:"Canola", body:"Aceite de canola en salsas, aioli, freidora o fideos.", tags:["Aceite", "Aioli", "Freidora"]},
+      {name:"Cítricos", body:"Limón, lima, naranja, yuzu y salsas con cítricos.", tags:["Yuzu", "Ponzu", "Guarniciones"]},
+      {name:"Cebolla", body:"Cebolla, cebollin y salsas o guarniciones con cebolla.", tags:["Cebollin", "Pico de gallo", "Salsas"]},
+      {name:"Cerdo", body:"Ingredientes con caldo de cerdo o chorizo.", tags:["Ramen", "Chorizo"]},
+      {name:"Cilantro", body:"Hierba fresca usada como guarnición en algunos platos.", tags:["Pico de gallo", "Barra fría"]},
+      {name:"Fruta de hueso", body:"Frutas con hueso como mango o salsas de fruta.", tags:["Mango", "Salsas de fruta"]},
+      {name:"Gluten", body:"Trigo en fideos, tempura, tortillas y algunas salsas de soya.", tags:["Fideos", "Tempura", "Salsas"]},
+      {name:"Hongos", body:"Hongos directos y posibles notas de contacto en freidora.", tags:["Shiitake", "Freidora compartida"]},
+      {name:"Huevo", body:"Puede estar en mayo, fideos, huevo onsen y mezclas picantes.", tags:["Kewpie", "Fideos", "Aioli"]},
+      {name:"Jengibre", body:"Presente en salsa de jengibre, encurtidos y sazonadores picantes.", tags:["Salsa de jengibre", "Togarashi"]},
+      {name:"Lácteos", body:"Ingredientes con leche como mantequilla, queso y caldos cremosos.", tags:["Mantequilla", "Brie", "Caldo cremoso"]},
+      {name:"Maíz", body:"Puede aparecer en fécula, tortillas, salsas y toppings.", tags:["Tempura", "Totopos", "Chorizo"]},
+      {name:"Mariscos", body:"Cangrejo, callo, pulpo, calamar, camarón y contacto en freidora.", tags:["Cangrejo", "Callo", "Calamar"]},
+      {name:"Palma", body:"Derivados de palma pueden aparecer en aceite de chile.", tags:["Aceite de chile"]},
+      {name:"Pescado", body:"Incluye pescado, dashi, bonito, huevas y estaciones compartidas.", tags:["Dashi", "Bonito", "Huevas"]},
+      {name:"Solanáceas", body:"Chiles, tomate, jalapeño y mezclas de especias.", tags:["Jalapeño", "Tomate", "Togarashi"]},
+      {name:"Soya", body:"Salsa de soya, tofu, miso, aceite de soya y marinados.", tags:["Salsa de soya", "Tofu", "Miso"]},
+      {name:"Aceite de chile", body:"Aceite picante que puede incluir soya, ajonjoli, ajo, cebolla o palma.", tags:["Picante", "Soya", "Ajonjoli"], terms:["Aceite de chile"]},
+      {name:"Alioli", body:"Salsa cremosa tipo mayo; revisar huevo, soya, pescado y citricos.", tags:["Huevo", "Soya", "Citricos"], terms:["Alioli", "Alioli de yuzu", "Alioli de habanero"]},
+      {name:"Brotes de bambu", body:"Brotes crujientes usados en ramen y caldos.", tags:["Ramen", "Caldo"], terms:["Brotes de bambu", "Brotes de bambú"]},
+      {name:"Caldo dashi", body:"Caldo japones que normalmente contiene pescado o bonito.", tags:["Pescado", "Bonito", "Sopa"], terms:["Caldo dashi", "Dashi"]},
+      {name:"Hojuelas de bonito", body:"Laminas secas de pescado; no son vegetarianas.", tags:["Pescado", "Dashi", "Guarnicion"], terms:["Hojuelas de bonito", "Bonito"]},
+      {name:"Huevo onsen", body:"Huevo suave servido como topping opcional.", tags:["Huevo", "Opcional"], terms:["Huevo onsen"]},
+      {name:"Mayonesa Kewpie", body:"Mayonesa japonesa; normalmente contiene huevo y puede tener aceite de soya.", tags:["Huevo", "Soya", "Mayo"], terms:["Mayonesa japonesa Kewpie", "Kewpie"]},
+      {name:"Masago habanero", body:"Hueva de pescado picante; contiene pescado y chile.", tags:["Pescado", "Habanero", "Solanaceas"], terms:["Masago habanero", "Masago"]},
+      {name:"Pastel de pescado", body:"Producto procesado de pescado que puede incluir mariscos o soya.", tags:["Pescado", "Mariscos", "Soya"], terms:["Pastel de pescado"]},
+      {name:"Pico de gallo", body:"Salsa fresca con tomate, cebolla, chile y citricos.", tags:["Tomate", "Cebolla", "Citricos"], terms:["Pico de gallo"]},
+      {name:"Ponzu", body:"Salsa citrica con soya; puede incluir ajo o pescado.", tags:["Soya", "Citricos", "Ajo"], terms:["Ponzu", "Yuzu ponzu", "Ponzu de ajo"]},
+      {name:"Res sukiyaki", body:"Res marinada dulce con soya; revisar gluten, soya, cebolla y pescado.", tags:["Soya", "Gluten", "Cebolla"], terms:["Res sukiyaki"]},
+      {name:"Salsa teriyaki", body:"Salsa dulce de soya; suele tener gluten, soya, maiz y cebolla.", tags:["Soya", "Gluten", "Maiz"], terms:["Salsa teriyaki"]},
+      {name:"Tobiko", body:"Hueva de pez volador; contiene pescado y puede tener soya o gluten.", tags:["Huevas", "Pescado", "Soya"], terms:["Tobiko"]},
+      {name:"Togarashi", body:"Sazonador japones de chile; revisar solanaceas y citricos.", tags:["Chile", "Solanaceas", "Citricos"], terms:["Togarashi", "Togarashi itokiri"]},
+      {name:"Vinagreta de miso", body:"Aderezo con miso; normalmente aporta soya y arroz.", tags:["Soya", "Arroz", "Aderezo"], terms:["Vinagreta de miso", "Miso"]},
+      {name:"Yuzu", body:"Citrico japones usado en ponzu, alioli y aderezos.", tags:["Citricos", "Salsas", "Alioli"], terms:["Yuzu", "Yuzu ponzu"]}
     ]
   }
 };
@@ -505,8 +717,9 @@ let lang = "en";
 try { lang = localStorage.getItem("japoAllLang") || (((navigator.language||"").toLowerCase().indexOf("es")===0) ? "es" : "en"); } catch(e){}
 let mode = "contains", query = "", activeChip = null;
 const openCards = new Set();
+const openGlossary = new Set();
 const $ = function(id){ return document.getElementById(id); };
-const $q=$("q"), $clear=$("clearBtn"), $chips=$("chips"), $results=$("results"), $count=$("count"), $hint=$("hint"), $mC=$("mContains"), $mA=$("mAvoid"), $tb=$("themeBtn"), $lb=$("langBtn"), $sub=$("subT"), $ft1=$("ft1"), $ft2=$("ft2");
+const $q=$("q"), $clear=$("clearBtn"), $chips=$("chips"), $results=$("results"), $count=$("count"), $hint=$("hint"), $mC=$("mContains"), $mA=$("mAvoid"), $tb=$("themeBtn"), $lb=$("langBtn"), $sub=$("subT"), $ft1=$("ft1"), $ft2=$("ft2"), $glossary=$("glossary"), $glossaryTitle=$("glossaryTitle"), $glossaryToggle=$("glossaryToggle"), $glossaryCards=$("glossaryCards");
 const L = function(){ return DATA[lang]; };
 const T = function(k){ return DATA[lang].ui[k]; };
 const norm = function(s){ return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,""); };
@@ -534,6 +747,44 @@ function allergenList(){
   const s = new Set();
   L().dishes.forEach(function(d){ d.alg.forEach(function(x){ s.add(x.a); }); });
   return Array.from(s).sort(function(a,b){ return a.localeCompare(b, lang); });
+}
+
+function dishesForGlossaryItem(item){
+  const target = norm(item.name);
+  const exactAllergen = L().dishes.some(function(d){
+    return d.alg.some(function(x){ return norm(x.a) === target; });
+  });
+  const terms = (item.terms || [item.name]).map(norm);
+  return L().dishes
+    .filter(function(d){
+      if (exactAllergen) return d.alg.some(function(x){ return norm(x.a) === target; });
+      return terms.some(function(term){
+        return norm(d.name).includes(term)
+          || d.ings.some(function(i){ return norm(i).includes(term); })
+          || d.alg.some(function(x){ return norm(x.s).includes(term); });
+      });
+    })
+    .map(function(d){ return d.name; });
+}
+
+function findMenuCard(name){
+  return Array.from($results.querySelectorAll(".card")).find(function(card){
+    return card.dataset.id === name;
+  });
+}
+
+function openMenuDish(name){
+  query = "";
+  activeChip = null;
+  $q.value = "";
+  openCards.add(name);
+  render();
+  requestAnimationFrame(function(){
+    const card = findMenuCard(name);
+    if (!card) return;
+    card.classList.add("open");
+    card.scrollIntoView({ behavior: "smooth", block: "center" });
+  });
 }
 
 function getFiltered(){
@@ -605,11 +856,13 @@ function cardHtml(item, term){
     + '</div><div class="card-body">' + thumb + note
     + '<div class="sec"><h4>' + T("ing") + '</h4><div class="ing">' + ings + '</div></div>'
     + '<div class="sec"><h4>' + T("alg") + '</h4><table class="alg">' + rows + '</table></div>'
-    + '<div class="sec"><h4>' + T("pairT") + '</h4>'
+    + '<div class="sec">'
+    + '<div class="pair-toggle" onclick="this.classList.toggle(\'open\')"><h4>' + T("pairT") + '</h4><svg class="pair-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div>'
+    + '<div class="pair-wrap">'
     + '<div class="pair">🥂 <b>' + T("w") + ':</b> ' + esc(d.pair.w) + '</div>'
     + '<div class="pair">🍷 <b>' + T("r") + ':</b> ' + esc(d.pair.r) + '</div>'
     + '<div class="pair">🍶 <b>' + T("sk") + ':</b> ' + esc(d.pair.s) + '</div>'
-    + '</div></div></div>';
+    + '</div></div></div></div>';
 }
 
 function render(){
@@ -638,12 +891,66 @@ function render(){
   $results.innerHTML = html;
 }
 
+function renderGlossary(){
+  const g = GLOSSARY[lang];
+  $glossaryTitle.textContent = g.title;
+  let cards = "";
+  g.items.forEach(function(item){
+    let tags = "";
+    let dishTags = "";
+    item.tags.forEach(function(tag){ tags += '<span>' + esc(tag) + '</span>'; });
+    dishesForGlossaryItem(item).forEach(function(name){ dishTags += '<button type="button" class="dish-link" data-dish="' + esc(name) + '">' + esc(name) + '</button>'; });
+    cards += '<div class="card ' + (openGlossary.has(item.name) ? "open" : "") + '" data-id="' + esc(item.name) + '">'
+      + '<div class="card-head">'
+      + '<div class="card-title"><h3>' + esc(item.name) + '</h3><div class="cat-tag">' + esc(g.title) + '</div></div>'
+      + '<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>'
+      + '</div><div class="card-body">'
+      + '<div class="sec"><h4>' + esc(g.about) + '</h4><p class="glossary-copy">' + esc(item.body) + '</p></div>'
+      + '<div class="sec"><h4>' + esc(g.watch) + '</h4><div class="ing">' + tags + '</div></div>'
+      + '<div class="sec"><h4>' + esc(g.dishes) + '</h4><div class="ing">' + dishTags + '</div></div>'
+      + '</div></div>';
+  });
+  $glossaryCards.innerHTML = '<div class="cards-grid glossary-grid">' + cards + '</div>';
+}
+
 $results.addEventListener("click", function(e){
   const h = e.target.closest(".card-head");
   if (!h) return;
   const c = h.parentElement, id = c.dataset.id;
   if (openCards.has(id)) openCards.delete(id); else openCards.add(id);
   c.classList.toggle("open");
+});
+
+$glossaryCards.addEventListener("click", function(e){
+  const link = e.target.closest(".dish-link");
+  if (link) {
+    e.preventDefault();
+    openMenuDish(link.dataset.dish);
+    return;
+  }
+  const h = e.target.closest(".card-head");
+  if (!h) return;
+  const c = h.parentElement, id = c.dataset.id;
+  if (openGlossary.has(id)) openGlossary.delete(id); else openGlossary.add(id);
+  c.classList.toggle("open");
+});
+
+function toggleGlossary(){
+  const isOpen = $glossary.classList.toggle("open");
+  $glossaryToggle.classList.toggle("open", isOpen);
+  const head = $glossaryToggle.querySelector(".card-head");
+  head.setAttribute("aria-expanded", isOpen ? "true" : "false");
+}
+
+$glossaryToggle.addEventListener("click", function(e){
+  const h = e.target.closest(".card-head");
+  if (!h || h.parentElement !== $glossaryToggle) return;
+  toggleGlossary();
+});
+$glossaryToggle.addEventListener("keydown", function(e){
+  if (e.key !== "Enter" && e.key !== " ") return;
+  e.preventDefault();
+  toggleGlossary();
 });
 
 const $lbx = document.getElementById("lightbox");
@@ -671,6 +978,7 @@ function applyLang(l, keepFilters){
   document.documentElement.lang = l;
   $hint.textContent = (mode === "contains") ? (query || activeChip ? T("hintC") : T("hint0")) : T("hintA");
   if (!keepFilters) { activeChip = null; query = ""; $q.value = ""; }
+  renderGlossary();
   render();
 }
 
@@ -691,6 +999,10 @@ try { savedTheme = localStorage.getItem("japoAllTheme") || "dark"; } catch(e){}
 applyTheme(savedTheme);
 $tb.onclick = function(){ applyTheme(document.body.classList.contains("dark") ? "light" : "dark"); };
 applyLang(lang, false);
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(function(){});
+}
 
 </script>
 </body>
